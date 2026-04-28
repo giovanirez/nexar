@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nexar — Sua Secretária de IA no WhatsApp</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --violet:    rgb(73, 29, 174);
+      --crimson:   rgb(209, 10, 73);
+      --blue:      rgb(10, 63, 233);
+      --orchid:    rgb(161, 41, 198);
+      --midnight:  rgb(11, 12, 69);
+      --white:     #ffffff;
+      --off-white: #f0eeff;
+      --glass:     rgba(255,255,255,0.07);
+      --glass-border: rgba(255,255,255,0.13);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--midnight);
+      color: var(--white);
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* ── CUSTOM CURSOR ── */
+    #cursor {
+      position: fixed; top: 0; left: 0; z-index: 9999;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: var(--crimson);
+      pointer-events: none;
+      mix-blend-mode: screen;
+      transition: transform .15s ease, width .2s, height .2s;
+      transform: translate(-50%, -50%);
+    }
+    #cursor-ring {
+      position: fixed; top: 0; left: 0; z-index: 9998;
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(209,10,73,.5);
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      transition: transform .35s cubic-bezier(.25,.46,.45,.94), width .25s, height .25s, opacity .25s;
+    }
+    body:hover #cursor-ring { opacity: 1; }
+
+    /* ── NOISE OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+      opacity: .03;
+      pointer-events: none;
+    }
+
+    /* ── AURORA BACKGROUND ── */
+    .aurora {
+      position: fixed; inset: 0; z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .aurora-blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(90px);
+      opacity: .35;
+      animation: float 18s ease-in-out infinite;
+    }
+    .aurora-blob:nth-child(1) {
+      width: 55vw; height: 55vw;
+      background: radial-gradient(circle, var(--violet), transparent 70%);
+      top: -10%; left: -10%;
+      animation-delay: 0s;
+    }
+    .aurora-blob:nth-child(2) {
+      width: 45vw; height: 45vw;
+      background: radial-gradient(circle, var(--orchid), transparent 70%);
+      top: 30%; right: -10%;
+      animation-delay: -6s;
+    }
+    .aurora-blob:nth-child(3) {
+      width: 35vw; height: 35vw;
+      background: radial-gradient(circle, var(--blue), transparent 70%);
+      bottom: -5%; left: 30%;
+      animation-delay: -12s;
+    }
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33%       { transform: translate(4%, 3%) scale(1.05); }
+      66%       { transform: translate(-3%, 5%) scale(.95); }
+    }
+
+    /* ── LAYOUT ── */
+    .container {
+      position: relative; z-index: 1;
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 40px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      background: rgba(11,12,69,.6);
+      border-bottom: 1px solid var(--glass-border);
+      transition: padding .3s;
+    }
+    nav.scrolled { padding: 14px 40px; }
+
+    .logo {
+      display: flex; align-items: center; gap: 10px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.5rem;
+      letter-spacing: -.02em;
+      text-decoration: none;
+      color: var(--white);
+    }
+    .logo-icon {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--violet), var(--orchid));
+      display: flex; align-items: center; justify-content: center;
+      font-size: .85rem;
+      font-weight: 800;
+    }
+
+    .nav-cta {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 22px;
+      border-radius: 100px;
+      background: linear-gradient(135deg, var(--crimson), var(--violet));
+      color: var(--white);
+      font-weight: 600;
+      font-size: .875rem;
+      text-decoration: none;
+      transition: transform .2s, box-shadow .2s;
+      box-shadow: 0 0 24px rgba(209,10,73,.35);
+    }
+    .nav-cta:hover { transform: scale(1.04); box-shadow: 0 0 36px rgba(209,10,73,.5); }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100dvh;
+      display: flex; flex-direction: column; justify-content: center;
+      padding: 120px 24px 80px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 16px;
+      border-radius: 100px;
+      border: 1px solid var(--glass-border);
+      background: var(--glass);
+      backdrop-filter: blur(10px);
+      font-size: .78rem;
+      font-weight: 500;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.75);
+      width: fit-content;
+      margin-bottom: 32px;
+      animation: fadeUp .8s ease both;
+    }
+    .badge-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--crimson);
+      box-shadow: 0 0 8px var(--crimson);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.6;transform:scale(.8)} }
+
+    .hero h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2.8rem, 7vw, 5.5rem);
+      font-weight: 800;
+      line-height: 1.0;
+      letter-spacing: -.03em;
+      animation: fadeUp .8s .1s ease both;
+    }
+    .hero h1 em {
+      font-style: normal;
+      background: linear-gradient(100deg, var(--crimson), var(--orchid), var(--blue));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-sub {
+      margin-top: 24px;
+      max-width: 520px;
+      font-size: 1.1rem;
+      font-weight: 300;
+      line-height: 1.7;
+      color: rgba(255,255,255,.65);
+      animation: fadeUp .8s .2s ease both;
+    }
+
+    .hero-actions {
+      margin-top: 44px;
+      display: flex; flex-wrap: wrap; gap: 16px;
+      animation: fadeUp .8s .3s ease both;
+    }
+
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 16px 32px;
+      border-radius: 100px;
+      background: linear-gradient(135deg, var(--violet), var(--crimson));
+      color: var(--white);
+      font-weight: 600;
+      font-size: 1rem;
+      text-decoration: none;
+      transition: transform .2s, box-shadow .2s;
+      box-shadow: 0 8px 40px rgba(73,29,174,.45);
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-primary::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,.12));
+    }
+    .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 14px 50px rgba(73,29,174,.6); }
+
+    .btn-ghost {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 15px 30px;
+      border-radius: 100px;
+      border: 1px solid var(--glass-border);
+      color: rgba(255,255,255,.8);
+      font-weight: 500;
+      font-size: 1rem;
+      text-decoration: none;
+      backdrop-filter: blur(10px);
+      background: var(--glass);
+      transition: background .2s, border-color .2s;
+    }
+    .btn-ghost:hover { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.3); }
+
+    /* ── HERO VISUAL ── */
+    .hero-visual {
+      position: absolute;
+      right: -60px; top: 50%;
+      transform: translateY(-50%);
+      width: min(580px, 55vw);
+      pointer-events: none;
+      animation: fadeLeft 1.2s .4s ease both;
+    }
+    @media (max-width: 900px) {
+      .hero-visual { display: none; }
+    }
+
+    .phone-frame {
+      width: 300px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--glass-border);
+      border-radius: 40px;
+      padding: 20px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 30px 80px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.1);
+      position: relative;
+      margin: 0 auto;
+    }
+    .phone-header {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 16px;
+      background: rgba(73,29,174,.3);
+      border-radius: 24px;
+      margin-bottom: 16px;
+      border: 1px solid rgba(73,29,174,.4);
+    }
+    .phone-avatar {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--violet), var(--orchid));
+      display: flex; align-items: center; justify-content: center;
+      font-size: .75rem; font-weight: 700;
+      flex-shrink: 0;
+    }
+    .phone-name { font-size: .85rem; font-weight: 600; }
+    .phone-status { font-size: .7rem; color: #4eff91; display: flex; align-items: center; gap: 4px; }
+    .phone-status::before { content:''; width:6px;height:6px;border-radius:50%;background:#4eff91;box-shadow:0 0 6px #4eff91; }
+
+    .chat-bubble {
+      border-radius: 18px;
+      padding: 11px 14px;
+      font-size: .8rem;
+      line-height: 1.5;
+      margin-bottom: 8px;
+      max-width: 88%;
+    }
+    .chat-bubble.bot {
+      background: rgba(73,29,174,.4);
+      border: 1px solid rgba(73,29,174,.35);
+      border-bottom-left-radius: 4px;
+    }
+    .chat-bubble.user {
+      background: rgba(10,63,233,.35);
+      border: 1px solid rgba(10,63,233,.3);
+      border-bottom-right-radius: 4px;
+      margin-left: auto;
+    }
+    .chat-bubble.typing span {
+      display: inline-block;
+      width: 6px; height: 6px; border-radius: 50%;
+      background: rgba(255,255,255,.5);
+      animation: typing 1.2s infinite;
+    }
+    .chat-bubble.typing span:nth-child(2) { animation-delay: .2s; }
+    .chat-bubble.typing span:nth-child(3) { animation-delay: .4s; }
+    @keyframes typing { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+
+    .calendar-chip {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 14px;
+      background: rgba(161,41,198,.25);
+      border: 1px solid rgba(161,41,198,.4);
+      border-radius: 14px;
+      font-size: .75rem;
+      margin-top: 8px;
+    }
+    .cal-icon { font-size: 1rem; }
+
+    /* orbit rings */
+    .orbit-wrapper {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%,-50%);
+      width: 500px; height: 500px;
+      pointer-events: none;
+    }
+    .orbit {
+      position: absolute; border-radius: 50%;
+      border: 1px dashed rgba(255,255,255,.08);
+      animation: spin linear infinite;
+    }
+    .orbit:nth-child(1) { inset: 0; animation-duration: 30s; }
+    .orbit:nth-child(2) { inset: 50px; animation-duration: 22s; animation-direction: reverse; }
+    .orbit:nth-child(3) { inset: 100px; animation-duration: 16s; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── SECTION BASE ── */
+    section { padding: 100px 0; position: relative; }
+
+    .section-label {
+      font-size: .75rem; font-weight: 600;
+      letter-spacing: .14em; text-transform: uppercase;
+      color: var(--crimson);
+      margin-bottom: 16px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .section-label::before {
+      content: '';
+      width: 28px; height: 2px;
+      background: var(--crimson);
+      border-radius: 2px;
+    }
+
+    .section-title {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(1.9rem, 4vw, 3rem);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -.025em;
+    }
+
+    /* ── HOW IT WORKS ── */
+    .how { background: transparent; }
+
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 24px;
+      margin-top: 60px;
+    }
+    .step-card {
+      padding: 36px 28px;
+      border-radius: 24px;
+      border: 1px solid var(--glass-border);
+      background: var(--glass);
+      backdrop-filter: blur(12px);
+      position: relative;
+      overflow: hidden;
+      transition: transform .3s, border-color .3s, box-shadow .3s;
+    }
+    .step-card::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, var(--c1, transparent) 0%, transparent 60%);
+      opacity: 0;
+      transition: opacity .3s;
+    }
+    .step-card:hover { transform: translateY(-6px); border-color: rgba(255,255,255,.25); box-shadow: 0 20px 60px rgba(0,0,0,.3); }
+    .step-card:hover::before { opacity: 1; }
+
+    .step-card:nth-child(1) { --c1: rgba(209,10,73,.15); }
+    .step-card:nth-child(2) { --c1: rgba(73,29,174,.2); }
+    .step-card:nth-child(3) { --c1: rgba(10,63,233,.15); }
+    .step-card:nth-child(4) { --c1: rgba(161,41,198,.15); }
+
+    .step-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 3rem;
+      font-weight: 800;
+      opacity: .1;
+      line-height: 1;
+      margin-bottom: 16px;
+    }
+    .step-icon {
+      width: 52px; height: 52px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem;
+      margin-bottom: 20px;
+    }
+    .step-card h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .step-card p { font-size: .9rem; line-height: 1.65; color: rgba(255,255,255,.6); }
+
+    /* ── BENEFITS ── */
+    .benefits { overflow: hidden; }
+    .benefits-wrap {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+    }
+    @media (max-width: 768px) { .benefits-wrap { grid-template-columns: 1fr; gap: 48px; } }
+
+    .benefit-list { display: flex; flex-direction: column; gap: 28px; margin-top: 48px; }
+    .benefit-item {
+      display: flex; gap: 18px; align-items: flex-start;
+      opacity: 0;
+      transform: translateX(-24px);
+      transition: opacity .6s, transform .6s;
+    }
+    .benefit-item.visible { opacity: 1; transform: none; }
+    .benefit-icon {
+      width: 46px; height: 46px; flex-shrink: 0;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem;
+      background: linear-gradient(135deg, rgba(73,29,174,.4), rgba(161,41,198,.3));
+      border: 1px solid rgba(161,41,198,.3);
+    }
+    .benefit-text h4 { font-family:'Syne',sans-serif; font-size:1rem; font-weight:700; margin-bottom:6px; }
+    .benefit-text p { font-size:.875rem; color:rgba(255,255,255,.6); line-height:1.6; }
+
+    /* calendar visual */
+    .cal-visual {
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--glass-border);
+      border-radius: 28px;
+      padding: 28px;
+      backdrop-filter: blur(12px);
+      position: relative;
+      overflow: hidden;
+    }
+    .cal-visual::after {
+      content:'';
+      position: absolute;
+      top: -40%; right: -30%;
+      width: 70%; height: 70%;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(161,41,198,.25), transparent 65%);
+      pointer-events: none;
+    }
+    .cal-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 20px;
+    }
+    .cal-month { font-family:'Syne',sans-serif; font-weight:700; font-size:1rem; }
+    .cal-nav { display:flex; gap:8px; }
+    .cal-nav button {
+      width: 30px; height: 30px; border-radius: 8px;
+      background: var(--glass); border: 1px solid var(--glass-border);
+      color: var(--white); cursor: pointer; font-size:.9rem;
+      display:flex;align-items:center;justify-content:center;
+      transition: background .2s;
+    }
+    .cal-nav button:hover { background: rgba(255,255,255,.12); }
+    .cal-grid {
+      display: grid; grid-template-columns: repeat(7,1fr);
+      gap: 4px; text-align: center;
+    }
+    .cal-day-label { font-size:.7rem; color:rgba(255,255,255,.4); padding:4px 0; }
+    .cal-day {
+      font-size:.8rem; padding:8px 4px; border-radius:8px;
+      transition: background .2s;
+      cursor: pointer;
+    }
+    .cal-day:hover { background: rgba(255,255,255,.08); }
+    .cal-day.today {
+      background: linear-gradient(135deg, var(--violet), var(--orchid));
+      font-weight: 700;
+    }
+    .cal-day.booked { position:relative; }
+    .cal-day.booked::after {
+      content:'';
+      position:absolute; bottom:3px; left:50%; transform:translateX(-50%);
+      width:4px;height:4px;border-radius:50%;
+      background:var(--crimson);
+    }
+    .cal-event {
+      margin-top: 18px; padding: 12px 14px;
+      background: rgba(73,29,174,.3);
+      border: 1px solid rgba(73,29,174,.4);
+      border-radius: 14px;
+      display: flex; align-items: center; gap: 12px;
+      font-size: .8rem;
+    }
+    .cal-event-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--orchid); flex-shrink:0; }
+    .cal-event-info strong { display:block; font-size:.82rem; margin-bottom:2px; }
+    .cal-event-info span { color:rgba(255,255,255,.5); font-size:.72rem; }
+
+    /* ── STATS ── */
+    .stats-section {
+      padding: 80px 0;
+      border-top: 1px solid var(--glass-border);
+      border-bottom: 1px solid var(--glass-border);
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 40px;
+      text-align: center;
+    }
+    .stat-item {}
+    .stat-num {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2.2rem, 5vw, 3.5rem);
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--white), var(--orchid));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+    }
+    .stat-label { font-size:.875rem; color:rgba(255,255,255,.55); margin-top:8px; }
+
+    /* ── FEATURES GRID ── */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin-top: 60px;
+    }
+    .feat-card {
+      padding: 32px 28px;
+      border-radius: 20px;
+      border: 1px solid var(--glass-border);
+      background: var(--glass);
+      backdrop-filter: blur(10px);
+      transition: transform .3s, border-color .3s;
+      position: relative;
+      overflow: hidden;
+    }
+    .feat-card.large { grid-column: span 2; }
+    @media(max-width:768px) { .feat-card.large { grid-column: span 1; } }
+    .feat-card:hover { transform: translateY(-4px); border-color: rgba(255,255,255,.22); }
+    .feat-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 5px 12px; border-radius: 100px;
+      font-size: .7rem; font-weight: 600; text-transform: uppercase; letter-spacing:.08em;
+      margin-bottom: 20px;
+    }
+    .feat-card h3 { font-family:'Syne',sans-serif; font-size:1.2rem; font-weight:700; margin-bottom:12px; }
+    .feat-card p { font-size:.875rem; color:rgba(255,255,255,.6); line-height:1.65; }
+
+    .feat-card:nth-child(1) .feat-chip { background:rgba(209,10,73,.15); color:#ff5588; border:1px solid rgba(209,10,73,.25); }
+    .feat-card:nth-child(2) .feat-chip { background:rgba(10,63,233,.15); color:#6696ff; border:1px solid rgba(10,63,233,.25); }
+    .feat-card:nth-child(3) .feat-chip { background:rgba(161,41,198,.15); color:#d86fff; border:1px solid rgba(161,41,198,.25); }
+    .feat-card:nth-child(4) .feat-chip { background:rgba(73,29,174,.2); color:#aa88ff; border:1px solid rgba(73,29,174,.3); }
+
+    /* ── CTA SECTION ── */
+    .cta-section {
+      padding: 120px 0;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-glow {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 600px; height: 400px;
+      background: radial-gradient(ellipse, rgba(73,29,174,.35) 0%, rgba(161,41,198,.2) 40%, transparent 70%);
+      pointer-events: none;
+    }
+    .cta-section h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2.2rem, 5vw, 4rem);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -.025em;
+      position: relative;
+    }
+    .cta-section p {
+      margin: 20px auto 48px;
+      max-width: 480px;
+      color: rgba(255,255,255,.6);
+      font-size: 1.05rem;
+      line-height: 1.7;
+      position: relative;
+    }
+
+    .btn-wpp {
+      display: inline-flex; align-items: center; gap: 12px;
+      padding: 18px 40px;
+      border-radius: 100px;
+      background: linear-gradient(135deg, #25D366, #128C7E);
+      color: var(--white);
+      font-weight: 700;
+      font-size: 1.05rem;
+      text-decoration: none;
+      box-shadow: 0 8px 40px rgba(37,211,102,.35);
+      transition: transform .2s, box-shadow .2s;
+      position: relative;
+    }
+    .btn-wpp:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 16px 55px rgba(37,211,102,.5); }
+
+    .wpp-icon { width: 26px; height: 26px; }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 50px 0 36px;
+      border-top: 1px solid var(--glass-border);
+    }
+    .footer-inner {
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 24px;
+    }
+    .footer-copy { font-size: .8rem; color: rgba(255,255,255,.35); }
+    .footer-links { display:flex; gap:24px; }
+    .footer-links a { font-size:.8rem; color:rgba(255,255,255,.4); text-decoration:none; transition:color .2s; }
+    .footer-links a:hover { color: rgba(255,255,255,.8); }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeLeft {
+      from { opacity: 0; transform: translateY(-50%) translateX(40px); }
+      to   { opacity: 1; transform: translateY(-50%) translateX(0); }
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity .7s ease, transform .7s ease;
+    }
+    .reveal.visible { opacity: 1; transform: none; }
+
+    /* ── MOBILE NAV ── */
+    @media(max-width: 640px) {
+      nav { padding: 16px 20px; }
+      .logo { font-size: 1.2rem; }
+      .hero { padding: 100px 20px 60px; }
+    }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--midnight); }
+    ::-webkit-scrollbar-thumb { background: var(--violet); border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+  <!-- CURSOR -->
+  <div id="cursor"></div>
+  <div id="cursor-ring"></div>
+
+  <!-- AURORA -->
+  <div class="aurora">
+    <div class="aurora-blob"></div>
+    <div class="aurora-blob"></div>
+    <div class="aurora-blob"></div>
+  </div>
+
+  <!-- NAV -->
+  <nav id="nav">
+    <a href="#" class="logo">
+      <div class="logo-icon">N</div>
+      Nexar
+    </a>
+    <a href="https://wa.me/553597063156" target="_blank" class="nav-cta">
+      <svg class="wpp-icon" viewBox="0 0 24 24" fill="currentColor" style="width:18px;height:18px"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+      Fale Conosco
+    </a>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-badge">
+        <span class="badge-dot"></span>
+        Powered by IA · Disponível 24h
+      </div>
+      <h1>Sua agenda,<br>no automático.<br><em>No WhatsApp.</em></h1>
+      <p class="hero-sub">
+        A Nexar é a secretária de inteligência artificial que recebe seus clientes pelo WhatsApp e agenda compromissos direto no seu Google Calendar — sem esforço.
+      </p>
+      <div class="hero-actions">
+        <a href="https://wa.me/553597063156" target="_blank" class="btn-primary">
+          <svg viewBox="0 0 24 24" fill="currentColor" style="width:20px;height:20px"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+          Começar agora
+        </a>
+        <a href="#como-funciona" class="btn-ghost">
+          Como funciona →
+        </a>
+      </div>
+    </div>
+
+    <!-- PHONE MOCKUP -->
+    <div class="hero-visual">
+      <div class="orbit-wrapper">
+        <div class="orbit"></div>
+        <div class="orbit"></div>
+        <div class="orbit"></div>
+      </div>
+      <div class="phone-frame">
+        <div class="phone-header">
+          <div class="phone-avatar">N</div>
+          <div>
+            <div class="phone-name">Nexar IA</div>
+            <div class="phone-status">Online agora</div>
+          </div>
+        </div>
+        <div class="chat-bubble bot">Olá! 👋 Sou a Nexar. Quando você gostaria de agendar sua consulta?</div>
+        <div class="chat-bubble user">Amanhã às 15h, pode ser?</div>
+        <div class="chat-bubble bot">
+          Perfeito! Confirmo o agendamento para amanhã, 15:00. Vou adicionar ao seu calendário agora mesmo 📅
+          <div class="calendar-chip">
+            <span class="cal-icon">📅</span>
+            <span>Adicionado ao Google Calendar ✓</span>
+          </div>
+        </div>
+        <div class="chat-bubble typing">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <div class="stats-section">
+    <div class="container">
+      <div class="stats-grid">
+        <div class="stat-item reveal">
+          <div class="stat-num">24/7</div>
+          <div class="stat-label">Disponibilidade total</div>
+        </div>
+        <div class="stat-item reveal">
+          <div class="stat-num">&lt;30s</div>
+          <div class="stat-label">Tempo médio de agendamento</div>
+        </div>
+        <div class="stat-item reveal">
+          <div class="stat-num">100%</div>
+          <div class="stat-label">Integração com Google Calendar</div>
+        </div>
+        <div class="stat-item reveal">
+          <div class="stat-num">Zero</div>
+          <div class="stat-label">Faltas por falta de confirmação</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <section class="how" id="como-funciona">
+    <div class="container">
+      <div class="section-label reveal">Como funciona</div>
+      <h2 class="section-title reveal">Em 4 passos,<br>sua agenda vira automática</h2>
+      <div class="steps-grid">
+        <div class="step-card reveal">
+          <div class="step-num">01</div>
+          <div class="step-icon" style="background:linear-gradient(135deg,rgba(209,10,73,.3),rgba(209,10,73,.1));border:1px solid rgba(209,10,73,.3)">💬</div>
+          <h3>Cliente manda mensagem</h3>
+          <p>Seu cliente entra em contato direto pelo WhatsApp — o canal que ele já usa todos os dias, sem apps extras.</p>
+        </div>
+        <div class="step-card reveal">
+          <div class="step-num">02</div>
+          <div class="step-icon" style="background:linear-gradient(135deg,rgba(73,29,174,.3),rgba(73,29,174,.1));border:1px solid rgba(73,29,174,.3)">🤖</div>
+          <h3>Nexar entende e responde</h3>
+          <p>Nossa IA interpreta a intenção da mensagem, pergunta os detalhes necessários e propõe horários disponíveis automaticamente.</p>
+        </div>
+        <div class="step-card reveal">
+          <div class="step-num">03</div>
+          <div class="step-icon" style="background:linear-gradient(135deg,rgba(10,63,233,.3),rgba(10,63,233,.1));border:1px solid rgba(10,63,233,.3)">📅</div>
+          <h3>Agendamento confirmado</h3>
+          <p>O horário é bloqueado instantaneamente no Google Calendar. Confirmações e lembretes são enviados automaticamente.</p>
+        </div>
+        <div class="step-card reveal">
+          <div class="step-num">04</div>
+          <div class="step-icon" style="background:linear-gradient(135deg,rgba(161,41,198,.3),rgba(161,41,198,.1));border:1px solid rgba(161,41,198,.3)">✨</div>
+          <h3>Você foca no que importa</h3>
+          <p>Nada de ligações perdidas, agenda dupla ou esquecimentos. A Nexar cuida de tudo enquanto você trabalha.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BENEFITS + CALENDAR -->
+  <section class="benefits" id="beneficios">
+    <div class="container">
+      <div class="benefits-wrap">
+        <div>
+          <div class="section-label reveal">Por que Nexar</div>
+          <h2 class="section-title reveal">Feita para quem<br>não tem tempo a perder</h2>
+          <div class="benefit-list">
+            <div class="benefit-item">
+              <div class="benefit-icon">⚡</div>
+              <div class="benefit-text">
+                <h4>Agendamento em segundos</h4>
+                <p>Sem formulários, sem ligações. O cliente agenda em menos de 30 segundos pelo WhatsApp.</p>
+              </div>
+            </div>
+            <div class="benefit-item">
+              <div class="benefit-icon">🔗</div>
+              <div class="benefit-text">
+                <h4>Integração nativa com Google Calendar</h4>
+                <p>Sincronização em tempo real. Nunca mais agenda dupla ou horários conflitantes.</p>
+              </div>
+            </div>
+            <div class="benefit-item">
+              <div class="benefit-icon">🔔</div>
+              <div class="benefit-text">
+                <h4>Lembretes automáticos</h4>
+                <p>A Nexar envia lembretes personalizados para você e seu cliente antes de cada compromisso.</p>
+              </div>
+            </div>
+            <div class="benefit-item">
+              <div class="benefit-icon">🌙</div>
+              <div class="benefit-text">
+                <h4>Disponível de madrugada</h4>
+                <p>Receba agendamentos às 2h da manhã sem precisar acordar. A Nexar nunca dorme.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="reveal">
+          <div class="cal-visual">
+            <div class="cal-header">
+              <div class="cal-month">Maio 2025</div>
+              <div class="cal-nav">
+                <button>‹</button>
+                <button>›</button>
+              </div>
+            </div>
+            <div class="cal-grid">
+              <div class="cal-day-label">D</div>
+              <div class="cal-day-label">S</div>
+              <div class="cal-day-label">T</div>
+              <div class="cal-day-label">Q</div>
+              <div class="cal-day-label">Q</div>
+              <div class="cal-day-label">S</div>
+              <div class="cal-day-label">S</div>
+              <div class="cal-day"></div>
+              <div class="cal-day">1</div>
+              <div class="cal-day booked">2</div>
+              <div class="cal-day">3</div>
+              <div class="cal-day booked">4</div>
+              <div class="cal-day">5</div>
+              <div class="cal-day">6</div>
+              <div class="cal-day booked">7</div>
+              <div class="cal-day">8</div>
+              <div class="cal-day booked">9</div>
+              <div class="cal-day">10</div>
+              <div class="cal-day booked">11</div>
+              <div class="cal-day booked">12</div>
+              <div class="cal-day">13</div>
+              <div class="cal-day today">14</div>
+              <div class="cal-day booked">15</div>
+              <div class="cal-day">16</div>
+              <div class="cal-day booked">17</div>
+              <div class="cal-day">18</div>
+              <div class="cal-day">19</div>
+              <div class="cal-day booked">20</div>
+              <div class="cal-day">21</div>
+              <div class="cal-day booked">22</div>
+              <div class="cal-day booked">23</div>
+              <div class="cal-day">24</div>
+              <div class="cal-day booked">25</div>
+              <div class="cal-day">26</div>
+              <div class="cal-day">27</div>
+              <div class="cal-day">28</div>
+              <div class="cal-day booked">29</div>
+              <div class="cal-day">30</div>
+              <div class="cal-day booked">31</div>
+            </div>
+            <div class="cal-event">
+              <div class="cal-event-dot"></div>
+              <div class="cal-event-info">
+                <strong>Consulta — João Silva</strong>
+                <span>Hoje · 15:00 → 16:00 · Adicionado pela Nexar</span>
+              </div>
+            </div>
+            <div class="cal-event" style="margin-top:8px;background:rgba(10,63,233,.2);border-color:rgba(10,63,233,.3)">
+              <div class="cal-event-dot" style="background:var(--blue)"></div>
+              <div class="cal-event-info">
+                <strong>Reunião — Maria Santos</strong>
+                <span>Amanhã · 10:00 → 11:00 · Adicionado pela Nexar</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section id="funcionalidades">
+    <div class="container">
+      <div class="section-label reveal">Funcionalidades</div>
+      <h2 class="section-title reveal">Tudo que você precisa,<br>direto no WhatsApp</h2>
+      <div class="features-grid">
+        <div class="feat-card reveal">
+          <div class="feat-chip">🤖 Inteligência Artificial</div>
+          <h3>Conversas naturais e inteligentes</h3>
+          <p>A Nexar entende linguagem natural em português. Seus clientes podem falar de forma casual — ela interpreta tudo e age da forma certa.</p>
+        </div>
+        <div class="feat-card reveal">
+          <div class="feat-chip">📆 Google Calendar</div>
+          <h3>Sincronização em tempo real</h3>
+          <p>Cada agendamento aparece instantaneamente na sua agenda. Funciona com múltiplos calendários e respeita suas disponibilidades.</p>
+        </div>
+        <div class="feat-card reveal">
+          <div class="feat-chip">🔔 Notificações</div>
+          <h3>Lembretes e confirmações automáticas</h3>
+          <p>Nunca mais cliente faltoso. A Nexar envia lembretes customizáveis e pede confirmação antes de cada compromisso.</p>
+        </div>
+        <div class="feat-card reveal">
+          <div class="feat-chip">🛡️ Confiabilidade</div>
+          <h3>Zero erros de agenda</h3>
+          <p>Sistema inteligente de conflitos que impede duplo agendamento. Sua agenda sempre organizada, mesmo nos dias mais cheios.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section" id="contato">
+    <div class="cta-glow"></div>
+    <div class="container">
+      <h2 class="reveal">Pronto para ter uma<br>secretária que nunca para?</h2>
+      <p class="reveal">Comece agora mesmo. Fale com a nossa equipe pelo WhatsApp e veja como a Nexar pode transformar sua agenda.</p>
+      <a href="https://wa.me/553597063156" target="_blank" class="btn-wpp reveal">
+        <svg class="wpp-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+        Falar com a Nexar agora
+      </a>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container">
+      <div class="footer-inner">
+        <div class="logo" style="font-size:1.1rem;">
+          <div class="logo-icon" style="width:28px;height:28px;font-size:.7rem;">N</div>
+          Nexar
+        </div>
+        <div class="footer-copy">© 2025 Nexar. Todos os direitos reservados.</div>
+        <div class="footer-links">
+          <a href="https://wa.me/553597063156" target="_blank">WhatsApp</a>
+          <a href="#">Privacidade</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ── CURSOR ──
+    const cur = document.getElementById('cursor');
+    const ring = document.getElementById('cursor-ring');
+    let mx = 0, my = 0, rx = 0, ry = 0;
+    document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+    (function loop() {
+      rx += (mx - rx) * .15; ry += (my - ry) * .15;
+      cur.style.left = mx + 'px'; cur.style.top = my + 'px';
+      ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+      requestAnimationFrame(loop);
+    })();
+    document.querySelectorAll('a, button').forEach(el => {
+      el.addEventListener('mouseenter', () => { cur.style.width='28px';cur.style.height='28px'; ring.style.width='60px';ring.style.height='60px'; });
+      el.addEventListener('mouseleave', () => { cur.style.width='18px';cur.style.height='18px'; ring.style.width='42px';ring.style.height='42px'; });
+    });
+
+    // ── NAV SCROLL ──
+    window.addEventListener('scroll', () => {
+      document.getElementById('nav').classList.toggle('scrolled', scrollY > 40);
+    });
+
+    // ── SCROLL REVEAL ──
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          observer.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+    document.querySelectorAll('.reveal, .benefit-item').forEach((el, i) => {
+      el.style.transitionDelay = (i % 4) * 0.08 + 's';
+      observer.observe(el);
+    });
+
+    // ── TYPING ANIMATION ──
+    const typing = document.querySelector('.chat-bubble.typing');
+    if (typing) {
+      setInterval(() => {
+        typing.style.opacity = typing.style.opacity === '0' ? '1' : '1';
+      }, 2000);
+    }
+
+    // ── SMOOTH ANCHOR ──
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        const t = document.querySelector(a.getAttribute('href'));
+        if (t) { e.preventDefault(); t.scrollIntoView({ behavior:'smooth' }); }
+      });
+    });
+  </script>
+</body>
+</html>

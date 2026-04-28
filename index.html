@@ -7,6 +7,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -130,13 +133,10 @@
       text-decoration: none;
       color: var(--white);
     }
-    .logo-icon {
-      width: 36px; height: 36px;
-      border-radius: 10px;
-      background: linear-gradient(135deg, var(--violet), var(--orchid));
-      display: flex; align-items: center; justify-content: center;
-      font-size: .85rem;
-      font-weight: 800;
+    
+    .logo img {
+      height: 36px;
+      width: auto;
     }
 
     .nav-cta {
@@ -263,9 +263,6 @@
       pointer-events: none;
       animation: fadeLeft 1.2s .4s ease both;
     }
-    @media (max-width: 900px) {
-      .hero-visual { display: none; }
-    }
 
     .phone-frame {
       width: 300px;
@@ -288,9 +285,7 @@
     }
     .phone-avatar {
       width: 38px; height: 38px; border-radius: 50%;
-      background: linear-gradient(135deg, var(--violet), var(--orchid));
-      display: flex; align-items: center; justify-content: center;
-      font-size: .75rem; font-weight: 700;
+      object-fit: cover;
       flex-shrink: 0;
     }
     .phone-name { font-size: .85rem; font-weight: 600; }
@@ -668,11 +663,113 @@
     }
     .reveal.visible { opacity: 1; transform: none; }
 
-    /* ── MOBILE NAV ── */
+    /* ── MOBILE NAV & HERO RESPONSIVENESS ── */
+    @media(max-width: 900px) {
+      .hero {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        padding-top: 140px;
+        text-align: center;
+      }
+      .hero-actions {
+        justify-content: center;
+      }
+      .hero-badge {
+        margin: 0 auto 32px auto;
+      }
+      .hero-sub {
+        margin: 24px auto 0 auto;
+      }
+      .hero-visual {
+        position: relative;
+        right: 0;
+        top: 0;
+        transform: none;
+        width: 100%;
+        margin-top: 60px;
+        display: block;
+        animation: fadeUp 1.2s .4s ease both;
+      }
+      .phone-frame {
+        width: 100%;
+        max-width: 320px;
+        text-align: left;
+      }
+      .orbit-wrapper {
+        width: 300px;
+        height: 300px;
+      }
+    }
+
+    /* ── MOBILE NAV & HERO RESPONSIVENESS ── */
+    @media(max-width: 900px) {
+      .hero {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        padding-top: 140px;
+        text-align: center;
+      }
+      .hero-actions {
+        justify-content: center;
+      }
+      .hero-badge {
+        margin: 0 auto 32px auto;
+      }
+      .hero-sub {
+        margin: 24px auto 0 auto;
+      }
+      .hero-visual {
+        position: relative;
+        right: 0;
+        top: 0;
+        transform: none;
+        width: 100%;
+        margin-top: 60px;
+        display: block;
+        animation: fadeUp 1.2s .4s ease both;
+      }
+      .phone-frame {
+        width: 100%;
+        max-width: 320px;
+        text-align: left;
+        margin: 0 auto; /* Garante que o celular fique no centro */
+      }
+      .orbit-wrapper {
+        width: 100%;
+        height: 300px;
+      }
+    }
+
     @media(max-width: 640px) {
       nav { padding: 16px 20px; }
       .logo { font-size: 1.2rem; }
-      .hero { padding: 100px 20px 60px; }
+      
+      /* Remove o padding lateral duplo para centralizar perfeitamente */
+      .hero { padding: 100px 0 60px; }
+      
+      /* Reduz o tamanho do texto principal */
+      .hero h1 { 
+        font-size: clamp(2.2rem, 8vw, 3rem); 
+      }
+      
+      /* Reduz o subtítulo para melhorar a leitura */
+      .hero-sub { 
+        font-size: 0.95rem; 
+        margin-top: 16px; 
+      }
+      
+      /* Empilha os botões no celular para não vazar a tela */
+      .hero-actions {
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+      }
+      .btn-primary, .btn-ghost {
+        width: 100%;
+        justify-content: center;
+      }
     }
 
     /* ── SCROLLBAR ── */
@@ -683,22 +780,18 @@
 </head>
 <body>
 
-  <!-- CURSOR -->
   <div id="cursor"></div>
   <div id="cursor-ring"></div>
 
-  <!-- AURORA -->
   <div class="aurora">
     <div class="aurora-blob"></div>
     <div class="aurora-blob"></div>
     <div class="aurora-blob"></div>
   </div>
 
-  <!-- NAV -->
   <nav id="nav">
     <a href="#" class="logo">
-      <div class="logo-icon">N</div>
-      Nexar
+      <img src="assets/images/logo.png" alt="Nexar Logo">
     </a>
     <a href="https://wa.me/553597063156" target="_blank" class="nav-cta">
       <svg class="wpp-icon" viewBox="0 0 24 24" fill="currentColor" style="width:18px;height:18px"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
@@ -706,7 +799,6 @@
     </a>
   </nav>
 
-  <!-- HERO -->
   <section class="hero">
     <div class="container">
       <div class="hero-badge">
@@ -728,7 +820,6 @@
       </div>
     </div>
 
-    <!-- PHONE MOCKUP -->
     <div class="hero-visual">
       <div class="orbit-wrapper">
         <div class="orbit"></div>
@@ -737,19 +828,19 @@
       </div>
       <div class="phone-frame">
         <div class="phone-header">
-          <div class="phone-avatar">N</div>
+          <img src="assets/images/logo-icon.png" alt="Nexar" class="phone-avatar">
           <div>
             <div class="phone-name">Nexar IA</div>
             <div class="phone-status">Online agora</div>
           </div>
         </div>
-        <div class="chat-bubble bot">Olá! 👋 Sou a Nexar. Quando você gostaria de agendar sua consulta?</div>
+        <div class="chat-bubble bot">Olá! <i class="fa-solid fa-hand"></i> Sou a Nexar. Quando você gostaria de agendar sua consulta?</div>
         <div class="chat-bubble user">Amanhã às 15h, pode ser?</div>
         <div class="chat-bubble bot">
-          Perfeito! Confirmo o agendamento para amanhã, 15:00. Vou adicionar ao seu calendário agora mesmo 📅
+          Perfeito! Confirmo o agendamento para amanhã, 15:00. Vou adicionar ao seu calendário agora mesmo <i class="fa-regular fa-calendar-check"></i>
           <div class="calendar-chip">
-            <span class="cal-icon">📅</span>
-            <span>Adicionado ao Google Calendar ✓</span>
+            <span class="cal-icon"><i class="fa-regular fa-calendar-check"></i></span>
+            <span>Adicionado ao Google Calendar <i class="fa-solid fa-check"></i></span>
           </div>
         </div>
         <div class="chat-bubble typing">
@@ -759,7 +850,6 @@
     </div>
   </section>
 
-  <!-- STATS -->
   <div class="stats-section">
     <div class="container">
       <div class="stats-grid">
@@ -783,7 +873,6 @@
     </div>
   </div>
 
-  <!-- HOW IT WORKS -->
   <section class="how" id="como-funciona">
     <div class="container">
       <div class="section-label reveal">Como funciona</div>
@@ -791,25 +880,25 @@
       <div class="steps-grid">
         <div class="step-card reveal">
           <div class="step-num">01</div>
-          <div class="step-icon" style="background:linear-gradient(135deg,rgba(209,10,73,.3),rgba(209,10,73,.1));border:1px solid rgba(209,10,73,.3)">💬</div>
+          <div class="step-icon" style="background:linear-gradient(135deg,rgba(209,10,73,.3),rgba(209,10,73,.1));border:1px solid rgba(209,10,73,.3)"><i class="fa-regular fa-comment-dots"></i></div>
           <h3>Cliente manda mensagem</h3>
           <p>Seu cliente entra em contato direto pelo WhatsApp — o canal que ele já usa todos os dias, sem apps extras.</p>
         </div>
         <div class="step-card reveal">
           <div class="step-num">02</div>
-          <div class="step-icon" style="background:linear-gradient(135deg,rgba(73,29,174,.3),rgba(73,29,174,.1));border:1px solid rgba(73,29,174,.3)">🤖</div>
+          <div class="step-icon" style="background:linear-gradient(135deg,rgba(73,29,174,.3),rgba(73,29,174,.1));border:1px solid rgba(73,29,174,.3)"><i class="fa-solid fa-robot"></i></div>
           <h3>Nexar entende e responde</h3>
           <p>Nossa IA interpreta a intenção da mensagem, pergunta os detalhes necessários e propõe horários disponíveis automaticamente.</p>
         </div>
         <div class="step-card reveal">
           <div class="step-num">03</div>
-          <div class="step-icon" style="background:linear-gradient(135deg,rgba(10,63,233,.3),rgba(10,63,233,.1));border:1px solid rgba(10,63,233,.3)">📅</div>
+          <div class="step-icon" style="background:linear-gradient(135deg,rgba(10,63,233,.3),rgba(10,63,233,.1));border:1px solid rgba(10,63,233,.3)"><i class="fa-regular fa-calendar-check"></i></div>
           <h3>Agendamento confirmado</h3>
           <p>O horário é bloqueado instantaneamente no Google Calendar. Confirmações e lembretes são enviados automaticamente.</p>
         </div>
         <div class="step-card reveal">
           <div class="step-num">04</div>
-          <div class="step-icon" style="background:linear-gradient(135deg,rgba(161,41,198,.3),rgba(161,41,198,.1));border:1px solid rgba(161,41,198,.3)">✨</div>
+          <div class="step-icon" style="background:linear-gradient(135deg,rgba(161,41,198,.3),rgba(161,41,198,.1));border:1px solid rgba(161,41,198,.3)"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
           <h3>Você foca no que importa</h3>
           <p>Nada de ligações perdidas, agenda dupla ou esquecimentos. A Nexar cuida de tudo enquanto você trabalha.</p>
         </div>
@@ -817,7 +906,6 @@
     </div>
   </section>
 
-  <!-- BENEFITS + CALENDAR -->
   <section class="benefits" id="beneficios">
     <div class="container">
       <div class="benefits-wrap">
@@ -826,28 +914,28 @@
           <h2 class="section-title reveal">Feita para quem<br>não tem tempo a perder</h2>
           <div class="benefit-list">
             <div class="benefit-item">
-              <div class="benefit-icon">⚡</div>
+              <div class="benefit-icon"><i class="fa-solid fa-bolt"></i></div>
               <div class="benefit-text">
                 <h4>Agendamento em segundos</h4>
                 <p>Sem formulários, sem ligações. O cliente agenda em menos de 30 segundos pelo WhatsApp.</p>
               </div>
             </div>
             <div class="benefit-item">
-              <div class="benefit-icon">🔗</div>
+              <div class="benefit-icon"><i class="fa-solid fa-link"></i></div>
               <div class="benefit-text">
                 <h4>Integração nativa com Google Calendar</h4>
                 <p>Sincronização em tempo real. Nunca mais agenda dupla ou horários conflitantes.</p>
               </div>
             </div>
             <div class="benefit-item">
-              <div class="benefit-icon">🔔</div>
+              <div class="benefit-icon"><i class="fa-regular fa-bell"></i></div>
               <div class="benefit-text">
                 <h4>Lembretes automáticos</h4>
                 <p>A Nexar envia lembretes personalizados para você e seu cliente antes de cada compromisso.</p>
               </div>
             </div>
             <div class="benefit-item">
-              <div class="benefit-icon">🌙</div>
+              <div class="benefit-icon"><i class="fa-regular fa-moon"></i></div>
               <div class="benefit-text">
                 <h4>Disponível de madrugada</h4>
                 <p>Receba agendamentos às 2h da manhã sem precisar acordar. A Nexar nunca dorme.</p>
@@ -925,29 +1013,28 @@
     </div>
   </section>
 
-  <!-- FEATURES -->
   <section id="funcionalidades">
     <div class="container">
       <div class="section-label reveal">Funcionalidades</div>
       <h2 class="section-title reveal">Tudo que você precisa,<br>direto no WhatsApp</h2>
       <div class="features-grid">
         <div class="feat-card reveal">
-          <div class="feat-chip">🤖 Inteligência Artificial</div>
+          <div class="feat-chip"><i class="fa-solid fa-robot" style="margin-right:4px;"></i> Inteligência Artificial</div>
           <h3>Conversas naturais e inteligentes</h3>
           <p>A Nexar entende linguagem natural em português. Seus clientes podem falar de forma casual — ela interpreta tudo e age da forma certa.</p>
         </div>
         <div class="feat-card reveal">
-          <div class="feat-chip">📆 Google Calendar</div>
+          <div class="feat-chip"><i class="fa-regular fa-calendar-days" style="margin-right:4px;"></i> Google Calendar</div>
           <h3>Sincronização em tempo real</h3>
           <p>Cada agendamento aparece instantaneamente na sua agenda. Funciona com múltiplos calendários e respeita suas disponibilidades.</p>
         </div>
         <div class="feat-card reveal">
-          <div class="feat-chip">🔔 Notificações</div>
+          <div class="feat-chip"><i class="fa-regular fa-bell" style="margin-right:4px;"></i> Notificações</div>
           <h3>Lembretes e confirmações automáticas</h3>
           <p>Nunca mais cliente faltoso. A Nexar envia lembretes customizáveis e pede confirmação antes de cada compromisso.</p>
         </div>
         <div class="feat-card reveal">
-          <div class="feat-chip">🛡️ Confiabilidade</div>
+          <div class="feat-chip"><i class="fa-solid fa-shield-halved" style="margin-right:4px;"></i> Confiabilidade</div>
           <h3>Zero erros de agenda</h3>
           <p>Sistema inteligente de conflitos que impede duplo agendamento. Sua agenda sempre organizada, mesmo nos dias mais cheios.</p>
         </div>
@@ -955,7 +1042,6 @@
     </div>
   </section>
 
-  <!-- CTA -->
   <section class="cta-section" id="contato">
     <div class="cta-glow"></div>
     <div class="container">
@@ -968,13 +1054,11 @@
     </div>
   </section>
 
-  <!-- FOOTER -->
   <footer>
     <div class="container">
       <div class="footer-inner">
         <div class="logo" style="font-size:1.1rem;">
-          <div class="logo-icon" style="width:28px;height:28px;font-size:.7rem;">N</div>
-          Nexar
+          <img src="assets/images/logo.png" alt="Nexar Logo" style="height:28px; width:auto; margin-right:8px;">
         </div>
         <div class="footer-copy">© 2025 Nexar. Todos os direitos reservados.</div>
         <div class="footer-links">
